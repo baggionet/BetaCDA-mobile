@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "AttendanceSaaS",
+    "slug": "attendance-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E3A5F"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.attendancesaas.mobile",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usamos Face ID para confirmar tu identidad al registrar tu asistencia."
+      }
+    },
+    "android": {
+      "package": "com.attendancesaas.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E3A5F"
+      },
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usamos Face ID para confirmar tu identidad al registrar tu asistencia."
+        }
+      ]
+    ],
+    "scheme": "attendancesaas",
+    "extra": {
+      "eas": {
+        "projectId": "TU_PROJECT_ID_AQUI"
+      }
+    }
+  }
+}
