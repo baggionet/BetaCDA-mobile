@@ -9,7 +9,9 @@ import { useMutation } from '@tanstack/react-query'
 import { bindDevice } from '../src/api/bind'
 import { getDeviceInfo } from '../src/utils/device'
 import useAuthStore from '../src/store/authStore'
-import { Ionicons } from '@expo/vector-icons'
+//import { Ionicons } from '@expo/vector-icons'
+import { Image } from 'react-native';
+const logoBetaCheck = require('../assets/images/Logo-betachecksinfondo.png');
 
 /**
  * BindScreen — Pantalla de vinculación del dispositivo.
@@ -68,8 +70,8 @@ export default function BindScreen() {
 
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="time-outline" size={36} color="#FFFFFF" />
+          <View>
+            <Image source={logoBetaCheck} style={{width: 90, height: 90}} />
           </View>
           <Text style={styles.title}>BetaCheck</Text>
           <Text style={styles.subtitle}>
