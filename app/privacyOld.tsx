@@ -1,43 +1,29 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, ActivityIndicator, Alert, TouchableOpacity} from 'react-native';
+import { useState } from 'react'
+import {
+  View, Text, TextInput, StyleSheet,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native'
 import { router } from 'expo-router'
+import { useMutation } from '@tanstack/react-query'
+import {acceptPrivacy} from '../src/api/bind'
 import { Image } from 'react-native';
-// Importamos la función que me mostraste en tu primera pregunta
-import {acceptPrivacy} from '../src/api/bind'; 
 const logoBetaCheck = require('../assets/images/Logo-betachecksinfondo.png');
 
-export default function PrivacyScreen({ navigation }: any) {
-  // Estado para saber si la petición está en curso
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleAccept = async () => {
-    setIsSubmitting(true); // Desactivamos el botón / mostramos spinner
-
-    try {
-      // Ejecutamos la función que conecta con el backend
-      await acceptPrivacy();
-      
-      // Si el backend responde con éxito (tanto si es nuevo como si ya existía):
-      Alert.alert("¡Éxito!", "Aviso de Privacidad actualizado correctamente.");
-      
-      // Aquí usualmente rediriges al usuario al Home o la siguiente pantalla
-      router.replace('/(app)/home')
-      
-    } catch (error) {
-      // Si el servidor falla (ej. error de red, token expirado, etc.)
-      console.error(error);
-      Alert.alert(
-        "Error", 
-        "No se pudo registrar tu aceptación. Por favor, inténtalo de nuevo."
-      );
-    } finally {
-      setIsSubmitting(false); // Volvemos a activar el flujo
-    }
-  };
-
+export default function PrivacyScreen() {
+  const handleAcceptPrivacy = () => {
+    // Aquí puedes manejar la aceptación de la política de privacidad
+    // Por ejemplo, actualizar el estado del usuario en tu store o backend
+    console.log('Política de privacidad aceptada')
+    acceptPrivacy()
+    router.replace('/(app)/home')
+  }
   return (
-    <View style={styles.content}>
-       {/* Logo */}
+
+    
+      <View style={styles.content}>
+
+        {/* Logo */}
         <View style={styles.logoContainer}>
           <View>
             <Image source={logoBetaCheck} style={{width: 90, height: 90}} />
@@ -50,22 +36,18 @@ export default function PrivacyScreen({ navigation }: any) {
          
         </View>
 
-      {isSubmitting ? (
-        // Si está cargando, mostramos un spinner
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        // Si no está cargando, mostramos el botón
+        {/* Input del código */}
         <View style={styles.formContainer}>
-          <Text style={styles.subtitle}>
+           <Text style={styles.subtitle}>
             Al aceptar, confirmas que has leído y comprendido nuestra política de privacidad.
           </Text>
-            <TouchableOpacity style={styles.button} onPress={acceptPrivacy}>
+          <TouchableOpacity style={styles.button} onPress={handleAcceptPrivacy}
+          >
               <Text style={styles.buttonText}>Aceptar</Text>
-            </TouchableOpacity>
-          </View>
-      )}
-    </View>
-  );
+          </TouchableOpacity>
+        </View>
+      </View>
+  )
 }
 
 const styles = StyleSheet.create({
