@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useAuthStore from '../src/store/authStore';
 import { StyleSheet, Text, View, Button, ActivityIndicator, Alert, TouchableOpacity} from 'react-native';
 import { router } from 'expo-router'
 import { Image } from 'react-native';
@@ -9,6 +10,7 @@ const logoBetaCheck = require('../assets/images/Logo-betachecksinfondo.png');
 export default function PrivacyScreen({ navigation }: any) {
   // Estado para saber si la petición está en curso
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateEmployee = useAuthStore((state) => state.updateEmployee)
 
   const handleAccept = async () => {
     setIsSubmitting(true); // Desactivamos el botón / mostramos spinner
@@ -16,7 +18,10 @@ export default function PrivacyScreen({ navigation }: any) {
     try {
       // Ejecutamos la función que conecta con el backend
       await acceptPrivacy();
-      
+
+      // Actualizar el store en memoria y SecureStore
+      updateEmployee({ privacy_accepted: true })
+       
       // Si el backend responde con éxito (tanto si es nuevo como si ya existía):
       Alert.alert("¡Éxito!", "Aviso de Privacidad actualizado correctamente.");
       
@@ -59,7 +64,7 @@ export default function PrivacyScreen({ navigation }: any) {
           <Text style={styles.subtitle}>
             Al aceptar, confirmas que has leído y comprendido nuestra política de privacidad.
           </Text>
-            <TouchableOpacity style={styles.button} onPress={acceptPrivacy}>
+            <TouchableOpacity style={styles.button} onPress={handleAccept} disabled={isSubmitting}>
               <Text style={styles.buttonText}>Aceptar</Text>
             </TouchableOpacity>
           </View>
