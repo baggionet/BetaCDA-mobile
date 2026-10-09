@@ -1,5 +1,6 @@
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
 /**
  * Cliente HTTP base para la API de AttendanceSaaS (móvil).
@@ -16,8 +17,15 @@ import * as SecureStore from 'expo-secure-store'
  * Por eso EXPO_PUBLIC_API_URL se configura distinto según
  * cómo estés probando — ver .env.example
  */
+
+const BASE_URL = Platform.OS === 'android'
+  ? 'http://10.0.2.2:8000/api/v1'           // Emulador Android
+  : process.env.EXPO_PUBLIC_API_URL     // iOS simulador / dispositivo físico
+
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1',
+  //configuracon temporal para desarrollo, se debe usar la variable de entorno EXPO_PUBLIC_API_URL en producción
+  baseURL: BASE_URL ?? 'http://localhost:8000/api/v1',
+  //baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

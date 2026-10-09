@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query'
 import { bindDevice } from '../src/api/bind'
 import { getDeviceInfo } from '../src/utils/device'
 import useAuthStore from '../src/store/authStore'
+import { Ionicons } from '@expo/vector-icons'
 //import { Ionicons } from '@expo/vector-icons'
 import { Image } from 'react-native';
 const logoBetaCheck = require('../assets/images/Logo-betachecksinfondo.png');

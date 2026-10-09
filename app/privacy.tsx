@@ -3,6 +3,7 @@ import useAuthStore from '../src/store/authStore';
 import { StyleSheet, Text, View, Button, ActivityIndicator, Alert, TouchableOpacity} from 'react-native';
 import { router } from 'expo-router'
 import { Image } from 'react-native';
+import * as SecureStore from 'expo-secure-store'
 // Importamos la función que me mostraste en tu primera pregunta
 import {acceptPrivacy} from '../src/api/bind'; 
 const logoBetaCheck = require('../assets/images/Logo-betachecksinfondo.png');
@@ -26,7 +27,14 @@ export default function PrivacyScreen({ navigation }: any) {
       Alert.alert("¡Éxito!", "Aviso de Privacidad actualizado correctamente.");
       
       // Aquí usualmente rediriges al usuario al Home o la siguiente pantalla
-      router.replace('/(app)/home')
+      //router.replace('/(app)/home')
+      //configuracion de Biometric Setup
+      const authMethod = await SecureStore.getItemAsync('auth_method')
+      if (!authMethod) {
+        router.replace('/biometric-setup')  // primera vez: configurar
+      } else {
+        router.replace('/(app)/home')        // ya configurado: ir directo
+      }
       
     } catch (error) {
       // Si el servidor falla (ej. error de red, token expirado, etc.)

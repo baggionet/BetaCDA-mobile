@@ -18,19 +18,14 @@ export const getStatus = async (): Promise<StatusResponse> => {
  * POST /api/v1/mobile/check
  * Registra un evento de asistencia.
  */
-export const checkIn = async (
-  eventType: EventType,
-  deviceUuid: string,
-  verificationMethod: VerificationMethod,
-  location?: { latitude: number; longitude: number }
-): Promise<CheckResponse> => {
-  const response = await api.post<ApiResponse<CheckResponse>>('/mobile/check', {
-    event_type:          eventType,
-    device_uuid:         deviceUuid,
-    verification_method: verificationMethod,
-    latitude:            location?.latitude,
-    longitude:           location?.longitude,
-  })
+export const checkIn = async (params: {
+  event_type: EventType
+  device_uuid: string
+  verification_method: VerificationMethod
+  latitude?: number
+  longitude?: number
+}): Promise<CheckResponse> => {
+  const response = await api.post<ApiResponse<CheckResponse>>('/mobile/check', params)
   if (!response.data.data) throw new Error(response.data.message)
   return response.data.data
 }
