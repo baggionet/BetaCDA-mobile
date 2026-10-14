@@ -24,8 +24,8 @@ const BASE_URL = Platform.OS === 'android'
 
 const api = axios.create({
   //configuracon temporal para desarrollo, se debe usar la variable de entorno EXPO_PUBLIC_API_URL en producción
-  baseURL: BASE_URL ?? 'http://localhost:8000/api/v1',
-  //baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1',
+  //baseURL: BASE_URL ?? 'http://localhost:8000/api/v1',
+  baseURL: process.env.EXPO_PUBLIC_API_URL, //?? 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

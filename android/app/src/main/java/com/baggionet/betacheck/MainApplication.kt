@@ -1,4 +1,4 @@
-package com.betacheck.mobile
+package com.baggionet.betacheck
 
 import android.app.Application
 import android.content.res.Configuration

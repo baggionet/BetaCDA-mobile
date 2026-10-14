@@ -43,10 +43,17 @@
         }
       ],
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Necesitamos tu ubicación para registrar dónde realizas tu chequeo de asistencia.",
+          "locationAlwaysPermission": "Necesitamos tu ubicación para registrar dónde realizas tu chequeo de asistencia."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "1.9.24",
+            
             "usesCleartextTraffic": true
           }
         }
@@ -58,6 +65,20 @@
       "expo-status-bar",
       "expo-web-browser"
     ],
+    "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para registrar dónde realizas tu chequeo de asistencia.",
+        "NSFaceIDUsageDescription": "Usamos Face ID para confirmar tu identidad."
+      }
+    },
+    "android": {
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
     "scheme": "betacheck",
     "extra": {
       "router": {},

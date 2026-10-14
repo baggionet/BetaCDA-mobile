@@ -13,6 +13,8 @@ import { getDeviceInfo } from '../../src/utils/device'
 import useAuthStore from '../../src/store/authStore'
 import PinModal from '../../src/components/ui/PinModal'
 import type { EventType } from '../../src/types'
+// se agrega la importación de Location para poder solicitar permisos de ubicación
+import * as Location from 'expo-location'
 
 const EVENT_CONFIG: Record<EventType, { label: string; icon: string; color: string; bg: string }> = {
   start_work:     { label: 'Iniciar labores',     icon: 'log-in-outline',           color: '#16A34A', bg: '#DCFCE7' },
@@ -123,6 +125,36 @@ export default function HomeScreen() {
     return result as 'pin_fallback' | null
   }
 
+// ── Obtener ubicación actual ──────────────────────────────
+const getLocation = async (): Promise<{ latitude: number; longitude: number } | null> => {
+  try {
+    // Solicitar permiso
+    const { status } = await Location.requestForegroundPermissionsAsync()
+
+    if (status !== 'granted') {
+      // Si el usuario niega el permiso, el chequeo continúa sin ubicación
+      console.log('Permiso de ubicación denegado')
+      return null
+    }
+
+    // Obtener coordenadas con precisión balanceada
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    })
+
+    return {
+      latitude:  location.coords.latitude,
+      longitude: location.coords.longitude,
+    }
+  } catch (error) {
+    // Si falla la ubicación, el chequeo continúa sin ella
+    console.log('Error obteniendo ubicación:', error)
+    return null
+  }
+}
+
+
+
   // ── Registrar chequeo ─────────────────────────────────────
   const handleCheckIn = async (eventType: EventType) => {
     setProcessingEvent(eventType)
@@ -131,10 +163,19 @@ export default function HomeScreen() {
       if (!verificationMethod) return
 
       const deviceInfo = await getDeviceInfo()
+
+      // Obtener ubicación en paralelo — no bloquea si falla
+      const location = await getLocation()
+
       await doCheckIn({
         event_type:          eventType,
         device_uuid:         deviceInfo.device_uuid,
         verification_method: verificationMethod,
+        // Solo enviar si se obtuvo la ubicación
+        ...(location && {
+          latitude:  location.latitude,
+          longitude: location.longitude,
+        }),
       })
 
       Alert.alert('✓ Registro exitoso', EVENT_CONFIG[eventType].label)
