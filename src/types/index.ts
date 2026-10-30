@@ -80,3 +80,39 @@ export interface DeviceInfo {
   os_version: string
   app_version: string
 }
+
+// Agrega estas dos interfaces nuevas
+interface TodaySchedule {
+  is_working_day:    boolean
+  start_time:        string | null
+  end_time:          string | null
+  tolerance_minutes: number
+  schedule_name:     string | null
+}
+
+interface Punctuality {
+  is_late:       boolean
+  late_minutes:  number
+  checked_in_at: string
+}
+
+export interface StatusResponse {
+  employee: {
+    id:               number
+    full_name:        string
+    position:         string
+    privacy_accepted: boolean
+  }
+  current_status:    string
+  last_event: {
+    event_type:    string
+    event_label:   string
+    registered_at: string
+  } | null
+  available_actions: EventType[]
+  server_time:       string
+  server_timezone:   string
+  // ── Campos nuevos ──
+  today_schedule:    TodaySchedule | null
+  punctuality:       Punctuality   | null
+}

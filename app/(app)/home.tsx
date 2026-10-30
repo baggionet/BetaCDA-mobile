@@ -33,21 +33,211 @@ const STATUS_COLOR: Record<string, string> = {
   'Sin registro hoy':   '#9CA3AF',
 }
 
-function ActionButton({ eventType, onPress, isLoading }: {
-  eventType: EventType; onPress: (e: EventType) => void; isLoading: boolean
+// ── Componente de botón de acción ─────────────────────────
+//function ActionButton({ eventType, onPress, isLoading }: {
+//  eventType: EventType; onPress: (e: EventType) => void; isLoading: boolean
+//}) {
+//  const config = EVENT_CONFIG[eventType]
+//  return (
+//    <TouchableOpacity
+//      style={[styles.actionButton, { backgroundColor: config.bg }, isLoading && styles.buttonDisabled]}
+//      onPress={() => onPress(eventType)} disabled={isLoading}
+//    >
+//      <Ionicons name={config.icon as any} size={28} color={config.color} />
+//      <Text style={[styles.actionLabel, { color: config.color }]}>{config.label}</Text>
+//      {isLoading && <ActivityIndicator size="small" color={config.color} />}
+//    </TouchableOpacity>
+//  )
+//}
+// ── Componente de botón de acción  mejorado─────────────────────────
+function ActionButton({ eventType, onPress, isLoading, disabled, disabledReason }: {
+  eventType: EventType
+  onPress: (e: EventType) => void
+  isLoading: boolean
+  disabled?: boolean
+  disabledReason?: string
 }) {
   const config = EVENT_CONFIG[eventType]
+  const isDisabled = isLoading || disabled
+
   return (
     <TouchableOpacity
-      style={[styles.actionButton, { backgroundColor: config.bg }, isLoading && styles.buttonDisabled]}
-      onPress={() => onPress(eventType)} disabled={isLoading}
+      style={[styles.actionButton, { backgroundColor: config.bg }, isDisabled && styles.buttonDisabled]}
+      onPress={() => !isDisabled && onPress(eventType)}
+      disabled={isDisabled}
     >
-      <Ionicons name={config.icon as any} size={28} color={config.color} />
-      <Text style={[styles.actionLabel, { color: config.color }]}>{config.label}</Text>
+      <Ionicons name={config.icon as any} size={28} color={isDisabled ? '#9CA3AF' : config.color} />
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.actionLabel, { color: isDisabled ? '#9CA3AF' : config.color }]}>
+          {config.label}
+        </Text>
+        {disabled && disabledReason && (
+          <Text style={styles.actionSubLabel}>{disabledReason}</Text>
+        )}
+      </View>
       {isLoading && <ActivityIndicator size="small" color={config.color} />}
+      {disabled && !isLoading && (
+        <Ionicons name="lock-closed-outline" size={16} color="#D1D5DB" />
+      )}
     </TouchableOpacity>
   )
 }
+
+// ── Componente de tarjeta de horario ───────────────────────
+function ScheduleCard({ schedule, punctuality, timezone }: {
+  schedule: any
+  punctuality: any
+  timezone: string
+}) {
+  if (!schedule) return null
+
+  // Si hoy es día de descanso
+  if (!schedule.is_working_day) {
+    return (
+      <View style={schedStyles.card}>
+        <Text style={schedStyles.label}>HORARIO DE HOY</Text>
+        <View style={schedStyles.restRow}>
+          <Ionicons name="moon-outline" size={18} color="#9CA3AF" />
+          <Text style={schedStyles.restText}>Día de descanso</Text>
+        </View>
+      </View>
+    )
+  }
+
+  return (
+    <View style={schedStyles.card}>
+      <View style={schedStyles.cardHeader}>
+        <Text style={schedStyles.label}>HORARIO DE HOY</Text>
+        {/* Badge de puntualidad — solo si ya checó entrada */}
+        {punctuality && (
+          punctuality.is_late ? (
+            <View style={schedStyles.badgeLate}>
+              <Ionicons name="warning-outline" size={12} color="#B45309" />
+              <Text style={schedStyles.badgeLateText}>
+                {punctuality.late_minutes} min tarde
+              </Text>
+            </View>
+          ) : (
+            <View style={schedStyles.badgeOnTime}>
+              <Ionicons name="checkmark-circle-outline" size={12} color="#15803D" />
+              <Text style={schedStyles.badgeOnTimeText}>A tiempo</Text>
+            </View>
+          )
+        )}
+      </View>
+
+      {/* Horario */}
+      <View style={schedStyles.timesRow}>
+        <View style={schedStyles.timeBlock}>
+          <Ionicons name="log-in-outline" size={16} color="#6B7280" />
+          <Text style={schedStyles.timeValue}>{schedule.start_time}</Text>
+          <Text style={schedStyles.timeLabel}>Entrada</Text>
+        </View>
+        <View style={schedStyles.timeSep} />
+        <View style={schedStyles.timeBlock}>
+          <Ionicons name="log-out-outline" size={16} color="#6B7280" />
+          <Text style={schedStyles.timeValue}>{schedule.end_time}</Text>
+          <Text style={schedStyles.timeLabel}>Salida</Text>
+        </View>
+        {schedule.tolerance_minutes > 0 && (
+          <>
+            <View style={schedStyles.timeSep} />
+            <View style={schedStyles.timeBlock}>
+              <Ionicons name="time-outline" size={16} color="#6B7280" />
+              <Text style={schedStyles.timeValue}>{schedule.tolerance_minutes}'</Text>
+              <Text style={schedStyles.timeLabel}>Tolerancia</Text>
+            </View>
+          </>
+        )}
+      </View>
+
+      {/* Nombre del horario y hora de chequeo si ya entró */}
+      <View style={schedStyles.cardFooter}>
+        {schedule.schedule_name && (
+          <Text style={schedStyles.scheduleName}>{schedule.schedule_name}</Text>
+        )}
+        {punctuality?.checked_in_at && (
+          <Text style={schedStyles.checkedIn}>
+            Entrada registrada: {punctuality.checked_in_at}
+          </Text>
+        )}
+      </View>
+    </View>
+  )
+}
+
+const schedStyles = StyleSheet.create({
+  card:            { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, gap: 14, borderWidth: 1, borderColor: '#E5E7EB' },
+  cardHeader:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  label:           { fontSize: 11, color: '#9CA3AF', fontWeight: '600', letterSpacing: 0.8 },
+  restRow:         { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  restText:        { fontSize: 15, color: '#9CA3AF', fontWeight: '500' },
+  timesRow:        { flexDirection: 'row', alignItems: 'center', gap: 0 },
+  timeBlock:       { flex: 1, alignItems: 'center', gap: 4 },
+  timeValue:       { fontSize: 20, fontWeight: '700', color: '#111827' },
+  timeLabel:       { fontSize: 11, color: '#9CA3AF' },
+  timeSep:         { width: 1, height: 40, backgroundColor: '#E5E7EB' },
+  cardFooter:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 },
+  scheduleName:    { fontSize: 12, color: '#6B7280', fontStyle: 'italic' },
+  checkedIn:       { fontSize: 12, color: '#6B7280' },
+  badgeLate:       { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FEF3C7', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1, borderColor: '#FCD34D' },
+  badgeLateText:   { fontSize: 12, color: '#B45309', fontWeight: '600' },
+  badgeOnTime:     { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#DCFCE7', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1, borderColor: '#86EFAC' },
+  badgeOnTimeText: { fontSize: 12, color: '#15803D', fontWeight: '600' },
+})
+
+/**
+ * Determina si un botón de evento está habilitado según el horario del día.
+ * Retorna { allowed: boolean; reason?: string }
+ */
+function isActionAllowed(
+  eventType: EventType,
+  schedule: any | null,
+  serverTime: string | null,
+  timezone: string
+): { allowed: boolean; reason?: string } {
+  // Sin horario asignado → todo permitido (comportamiento anterior)
+  if (!schedule || !schedule.is_working_day) return { allowed: true }
+  // Sin hora del servidor → no bloquear
+  if (!serverTime) return { allowed: true }
+
+  // Hora actual en minutos desde medianoche (usando server_time)
+  const now = new Date(serverTime)
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+
+  const toMin = (hhmm: string | null): number | null => {
+    if (!hhmm) return null
+    const [h, m] = hhmm.split(':').map(Number)
+    return h * 60 + m
+  }
+
+  const startMin      = toMin(schedule.start_time)
+  const endMin        = toMin(schedule.end_time)
+  const tolerance     = schedule.tolerance_minutes ?? 0
+  const EARLY_WINDOW  = 30  // minutos antes de start_time que ya se habilita el botón
+  const END_WINDOW    = 60  // minutos antes de end_time que se habilita "Terminar jornada"
+
+  if (eventType === 'start_work') {
+    if (startMin === null) return { allowed: true }
+    const openAt  = startMin - EARLY_WINDOW
+    const closeAt = startMin + tolerance
+    if (nowMin < openAt)  return { allowed: false, reason: `Disponible a las ${schedule.start_time}` }
+    if (nowMin > closeAt) return { allowed: false, reason: 'Ventana de entrada cerrada' }
+    return { allowed: true }
+  }
+
+  if (eventType === 'end_work') {
+    if (endMin === null) return { allowed: true }
+    const openAt = endMin - END_WINDOW
+    if (nowMin < openAt) return { allowed: false, reason: `Disponible aprox. a las ${schedule.end_time}` }
+    return { allowed: true }
+  }
+
+  // start_lunch, end_lunch, start_overtime, end_overtime → sin restricción de horario
+  return { allowed: true }
+}
+
+// ── Componente principal de la pantalla de inicio ─────────────
 
 export default function HomeScreen() {
   const queryClient = useQueryClient()
@@ -206,6 +396,8 @@ const getLocation = async (): Promise<{ latitude: number; longitude: number } | 
     )
   }
 
+  const todaySchedule = status?.today_schedule ?? null
+  const punctuality   = status?.punctuality   ?? null
   const availableActions = (status?.available_actions ?? []) as EventType[]
   const currentStatus    = status?.current_status ?? 'Sin registro hoy'
   const statusColor      = STATUS_COLOR[currentStatus] ?? '#9CA3AF'
@@ -255,6 +447,15 @@ const getLocation = async (): Promise<{ latitude: number; longitude: number } | 
           </Text>
         </View>
 
+
+        <ScheduleCard
+          schedule={todaySchedule}
+          punctuality={punctuality}
+          timezone={timezone}
+        />
+
+
+
         {/* Acciones */}
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>
@@ -270,16 +471,38 @@ const getLocation = async (): Promise<{ latitude: number; longitude: number } | 
               </Text>
             </View>
           ) : (
+            //<View style={styles.actionsGrid}>
+            //  {availableActions.map((eventType) => (
+            //    <ActionButton
+            //      key={eventType}
+            //      eventType={eventType}
+            //      onPress={handleCheckIn}
+            //      isLoading={processingEvent === eventType}
+            //    />
+            //  ))}
+            //</View>
+
             <View style={styles.actionsGrid}>
-              {availableActions.map((eventType) => (
-                <ActionButton
-                  key={eventType}
-                  eventType={eventType}
-                  onPress={handleCheckIn}
-                  isLoading={processingEvent === eventType}
-                />
-              ))}
+              {availableActions.map((eventType) => {
+                const { allowed, reason } = isActionAllowed(
+                  eventType,
+                  todaySchedule,
+                  status?.server_time ?? null,
+                  timezone
+                )
+                return (
+                  <ActionButton
+                    key={eventType}
+                    eventType={eventType}
+                    onPress={handleCheckIn}
+                    isLoading={processingEvent === eventType}
+                    disabled={!allowed}
+                    disabledReason={reason}
+                  />
+                )
+              })}
             </View>
+
           )}
         </View>
 
@@ -326,4 +549,5 @@ const styles = StyleSheet.create({
   completedText:      { fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 22 },
   historyLink:        { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#E5E7EB' },
   historyLinkText:    { fontSize: 14, color: '#2563EB', fontWeight: '500', flex: 1 },
+  actionSubLabel:     { fontSize: 11, color: '#9CA3AF', marginTop: 2 },
 })
